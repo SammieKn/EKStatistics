@@ -55,4 +55,21 @@ def calculate_team_stats(df, team):
     
     else:
         return None
+    
+def team_won(df, team):
+    # Find indices where the team won as home team
+    home_wins = df[(df['home_team'] == team) & (df['home_score'] > df['away_score'])].index
+    
+    # Find indices where the team won as away team
+    away_wins = df[(df['away_team'] == team) & (df['away_score'] > df['home_score'])].index
+    
+    # Combine the indices
+    won_indices = home_wins.union(away_wins)
+    
+    return won_indices
 
+def highlight_wins(s, won_indices):
+    if s.name in won_indices:
+        return ['background-color: rgba(0, 255, 0, 0.1)'] * len(s)
+    else:
+        return [''] * len(s)
