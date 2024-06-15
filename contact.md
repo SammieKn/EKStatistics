@@ -24,6 +24,8 @@ I'm currently employed 36hrs a week but am open for:
 
 ## 📌 Additional Information
 
+*Summary of LinkedIn*
+
 From a young age, I used to visit construction sites with my dad and was always fascinated with the built environment. I remember him getting crazy about me constantly asking: “But why do they do X, dad?”. Throughout my life, I held on to this curiosity and pursued an education in Civil Engineering to find the 'why'.
 
 During my education, I found a passion for digitalization and AI. I was fascinated by the “how” of computers learning and was fortunate enough to explore this during my thesis. Since completing my education, I have continually explored avenues for incorporating digitalization within my projects.
