@@ -83,7 +83,7 @@ bar_chart = alt.Chart(top_scorers[:10]).mark_bar().encode(
 # Display the bar chart in Streamlit
 st.altair_chart(bar_chart, use_container_width=True)
 # ------------------------------
-st.subheader('Historical Statistics')
+st.subheader('Game Statistics')
 outcome = calculate_team_stats(df=df_res_filtered, team=team)
 if outcome:
     col1, col2, col3 = st.columns(3)    
@@ -162,8 +162,20 @@ combined_chart = alt.layer(line_chart, points_filtered).configure_axis(
 
 st.altair_chart(combined_chart, use_container_width=True)
 # ------------------------------
+st.subheader(f'Games per Tournament from {years[0]} to {years[1]}')
+games_tournament = df_res_filtered.groupby('tournament').size().reset_index(name='count').sort_values(by='count', ascending=False)
+
+bar_chart = alt.Chart(games_tournament).mark_bar().encode(
+    x=alt.X('count:Q', title='Count of Games'),
+    y=alt.Y('tournament:N', sort='-x', title='Tournament'),
+    color=alt.Color('count:Q', scale=alt.Scale(scheme='oranges'), legend=None)
+)
+
+# Display the bar chart in Streamlit
+st.altair_chart(bar_chart, use_container_width=True)
+# ------------------------------
 st.subheader('Last Ten Matches')
-df_10 = df_res_filtered.drop(['tournament', 'country', 'neutral'], axis=1)
+df_10 = df_res_filtered.drop(['city', 'country', 'neutral'], axis=1)
 df_10 = df_10.sort_values(by='date', ascending=False)
 df_10 = df_10[df_10['date'] <= datetime.now()].head(10)
 df_10['date'] = df_10['date'].dt.date
