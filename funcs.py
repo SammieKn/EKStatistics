@@ -22,6 +22,8 @@ def filter_years(df: pd.DataFrame, year_range):
     return df[(df["date"].dt.year >= start) & (df["date"].dt.year <= end)]
 
 def filter_dataframe(df: pd.DataFrame, home_team=None, tournaments=None, opponents=None, year_range=None):
+
+    df = df.dropna()  # Drop missing values, e.g. games still to come
     if home_team:
         df = filter_team(df, home_team)
     if tournaments:
