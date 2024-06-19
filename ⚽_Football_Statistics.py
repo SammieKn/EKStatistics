@@ -1,3 +1,5 @@
+# Importing the required packages
+# ------------------------------
 import streamlit as st
 import pandas as pd
 import altair as alt
@@ -6,7 +8,7 @@ from datetime import datetime
 from funcs import filter_dataframe, calculate_team_stats, team_won, highlight_wins
 
 
-
+# Loading the data
 @st.cache_data
 def load_data():
     """
@@ -55,11 +57,13 @@ years = st.sidebar.slider(
     max_value=max_value,
     value=(1980 if 1980 > min_value else min_value, max_value)
 )
+
+# Filter the results based on sidebar
 # ------------------------------
 
-# filter the results
 df_res_filtered = filter_dataframe(df_results, home_team=team, tournaments=tournaments, opponents=opponents, year_range=years)
 
+# Graph showing the top 10 scorers for the country
 # ------------------------------
 
 st.title(f'Football stats of {team} :soccer:')
@@ -72,7 +76,6 @@ top_scorers = df_goals[df_goals['team'] == team].merge(
 )
 top_scorers = top_scorers.groupby(by='scorer').size().reset_index(name='counts')
 top_scorers = top_scorers.sort_values('counts', ascending=False)[:10]
-# top_scorers = top_scorers.set_index('scorer')
 
 bar_chart = alt.Chart(top_scorers[:10]).mark_bar().encode(
     x=alt.X('counts:Q', title='Count of Goals'),
@@ -80,8 +83,9 @@ bar_chart = alt.Chart(top_scorers[:10]).mark_bar().encode(
     color=alt.Color('counts:Q', scale=alt.Scale(scheme='oranges'), legend=None)
 )
 
-# Display the bar chart in Streamlit
 st.altair_chart(bar_chart, use_container_width=True)
+
+# KPI from game statistics
 # ------------------------------
 st.subheader('Game Statistics')
 outcome = calculate_team_stats(df=df_res_filtered, team=team)
@@ -96,6 +100,7 @@ if outcome:
     col2.metric("Losing Percentage", f'{lose_ratio}%')
     col3.metric("Draw Percentage", f'{draw_ratio}%')
 
+# Total win percentage per year versus win percentage of filters
 # ------------------------------
 st.subheader('Win Percentage Per Year')
 df_results_year = df_res_filtered.groupby(df_res_filtered['date'].dt.year)
@@ -161,6 +166,8 @@ combined_chart = alt.layer(line_chart, points_filtered).configure_axis(
 )
 
 st.altair_chart(combined_chart, use_container_width=True)
+
+# Games played over the time range per tournament
 # ------------------------------
 st.subheader(f'Games per Tournament from {years[0]} to {years[1]}')
 games_tournament = df_res_filtered.groupby('tournament').size().reset_index(name='count').sort_values(by='count', ascending=False)
@@ -173,6 +180,8 @@ bar_chart = alt.Chart(games_tournament).mark_bar().encode(
 
 # Display the bar chart in Streamlit
 st.altair_chart(bar_chart, use_container_width=True)
+
+# Last ten matches displayed in a table
 # ------------------------------
 st.subheader('Last Ten Matches')
 df_10 = df_res_filtered.drop(['city', 'country', 'neutral'], axis=1)

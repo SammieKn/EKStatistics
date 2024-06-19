@@ -1,6 +1,6 @@
 # ⚽ Football Statistics Dashboard
 
-Welcome to the Football Statistics Dashboard project! This project provides an interactive web application to explore and analyze football statistics using Streamlit. The app includes various features such as top scorers, historical statistics, win percentages, and recent match results. The data originates from the [International football results from 1872 to 2024](https://www.kaggle.com/datasets/martj42/international-football-results-from-1872-to-2017) dataset on Kaggle. Thanks to Mart Jürisoo for making this dataset available.
+Welcome to the Football Statistics Dashboard project ([Github](https://github.com/SammieKn/EKStatistics))! This project provides an interactive web application to explore and analyze football statistics using Streamlit. The app includes various features such as top scorers, historical statistics, win percentages, and recent match results. The data originates from the [International football results from 1872 to 2024](https://www.kaggle.com/datasets/martj42/international-football-results-from-1872-to-2017) dataset on Kaggle. Thanks to Mart Jürisoo for making this dataset available.
 
 The goal of the project is to deploy my first application in the cloud via Azure to apply my knowledge gathered from the [AZ-900: Azure fundamentals](https://learn.microsoft.com/en-us/credentials/certifications/azure-fundamentals/?practice-assessment-type=certification) certificate.
 
@@ -23,8 +23,9 @@ The Football Statistics Dashboard is an interactive web application designed to 
 ## Features
 
 - **Top Scorers**: View the top 10 scorers for a selected team per league and/or opponent.
-- **Historical Statistics**: Analyze win, loss, and draw percentages for a selected team per league and/or opponent.
-- **Win Percentage Per Year**: Visualize the win percentage of a team over different years per league and/or opponent.
+- **Game Statistics**: Analyze win, loss, and draw percentages for a selected team per league and/or opponent.
+- **Win Percentage Per Year**: Visualize the win percentage of a team over different years per league and/or opponent. Compare the win percentage against the grand total of the country.
+- **Games per Tournament**: View the games played for the different tournaments.
 - **Recent Matches**: Display the last ten matches of the selected team with results highlighted per league and/or opponent.
 
 ## Usage
@@ -63,7 +64,7 @@ If you want to run the project locally, follow these steps:
 
 ## Contributing
 
-I want to welcome contributions (especially first timers)! It can be hard to find first projects to work on. If you only want to change some text or go all-out, I'm open for it :happy:. Once I accept your pull-request you can immediately see the results on the webpage!
+I want to welcome contributions (especially first timers)! It can be hard to find first projects to work on. If you only want to change some text or go all-out, I'm open for it :smiley:. Once I accept your pull-request, you can immediately see the results on the webpage!
 
 To contribute please follow the following steps:
 
