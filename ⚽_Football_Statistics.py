@@ -7,6 +7,11 @@ from datetime import datetime
 
 from funcs import filter_dataframe, calculate_team_stats, team_won, highlight_wins
 
+#Page configurations including favicon and title
+st.set_page_config(
+    page_title='International Football Statistics',
+    page_icon="./assets/icons8-football-ball-pastel-96.png"
+)
 
 # Loading the data
 @st.cache_data
