@@ -34,6 +34,39 @@ def load_data():
 
 df_goals, df_results, df_shootouts = load_data()
 
+@st.cache_data
+def compute_win_percentage(df_res_filtered_map):
+    """Function to calculate for each team the win percentage based on a filtered input dataframe as input for the
+    map"""
+
+    map_data = {
+        'country': [],
+        'win_ratio': []
+    }
+
+    map_df = pd.DataFrame(map_data)
+
+    # Calculate win ratio's for each country
+    for team in teams:
+        if team not in country_coords:
+            continue
+
+        total_wins = len(team_won(df_res_filtered_map, team=team))
+
+        try:
+            total_num_matches = len(filter_dataframe(df_res_filtered_map, home_team=team))
+        except ValueError:
+            # in case no information is present for a team in the selected time range
+            continue
+
+        win_pct = total_wins / total_num_matches
+
+        # Add the team (country) to the map with the corresponding win ratio
+        team_map_data = {'country': [team], 'win_ratio': [win_pct]}
+        team_map_df = pd.DataFrame(team_map_data)
+        map_df = pd.concat([map_df, team_map_df])
+
+    return map_df
 
 # Sidebar area
 # ------------------------------
@@ -203,26 +236,11 @@ st.dataframe(df_10, hide_index=True, use_container_width=True)
 # World map
 # ---------
 
-map_data = {
-    'country': [],
-    'win_ratio': []
-}
+# Filter the results based on the year span and tournament
+df_res_filtered_map = filter_dataframe(df_results, tournaments=tournaments, year_range=years)
 
-map_df = pd.DataFrame(map_data)
-
-# Calculate win ratio's for each country
-for team in teams:
-    if team not in country_coords:
-        continue
-
-    df_res_filtered = filter_dataframe(df_results, year_range=years)
-    won_indices = team_won(df_res_filtered, team=team)
-    win_pct = round(len(won_indices) / df_res_filtered[~df_res_filtered['home_score'].isna()].shape[0] * 100, 1)
-
-    # Add the team (country) to the map with the corresponding win ratio
-    team_map_data = {'country': [team], 'win_ratio': [win_pct]}
-    team_map_df = pd.DataFrame(team_map_data)
-    map_df = pd.concat([map_df, team_map_df])
+# Create the dataframe (win percentages per country/team) for the map
+map_df = compute_win_percentage(df_res_filtered_map)
 
 def get_country_lat(country):
     return country_coords.get(country, (0, 0))[0]
