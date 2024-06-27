@@ -4,6 +4,9 @@ import streamlit as st
 import pandas as pd
 import altair as alt
 from datetime import datetime
+import folium
+from streamlit_folium import st_folium
+from country_coords import country_coords
 
 from funcs import filter_dataframe, calculate_team_stats, team_won, highlight_wins
 
@@ -197,3 +200,63 @@ df_10[['home_score', 'away_score']] = df_10[['home_score', 'away_score']].astype
 df_10 = df_10.style.apply(highlight_wins, won_indices=team_won(df_10, team=team), axis=1)
 st.dataframe(df_10, hide_index=True, use_container_width=True)
 
+# World map
+# ---------
+
+map_data = {
+    'country': [],
+    'win_ratio': []
+}
+
+map_df = pd.DataFrame(map_data)
+
+# Calculate win ratio's for each country
+for team in teams:
+    if team not in country_coords:
+        continue
+
+    df_res_filtered = filter_dataframe(df_results, year_range=years)
+    won_indices = team_won(df_res_filtered, team=team)
+    win_pct = round(len(won_indices) / df_res_filtered[~df_res_filtered['home_score'].isna()].shape[0] * 100, 1)
+
+    # Add the team (country) to the map with the corresponding win ratio
+    team_map_data = {'country': [team], 'win_ratio': [win_pct]}
+    team_map_df = pd.DataFrame(team_map_data)
+    map_df = pd.concat([map_df, team_map_df])
+
+def get_country_lat(country):
+    return country_coords.get(country, (0, 0))[0]
+
+def get_country_lon(country):
+    return country_coords.get(country, (0, 0))[1]
+
+
+# Function to map win ratio to color
+def win_ratio_to_color(win_ratio):
+    if win_ratio > 0.75:
+        return 'darkgreen'
+    elif win_ratio > 0.5:
+        return 'lightgreen'
+    elif win_ratio > 0.25:
+        return 'orange'
+    else:
+        return 'red'
+
+# Create a base map
+m = folium.Map(location=[20, 0], zoom_start=2)
+
+# Add countries to the map
+for idx, row in map_df.iterrows():
+    folium.CircleMarker(
+        location=(get_country_lat(row['country']), get_country_lon(row['country'])),
+        radius=10,
+        color=win_ratio_to_color(row['win_ratio']),
+        fill=True,
+        fill_color=win_ratio_to_color(row['win_ratio']),
+        fill_opacity=0.6,
+        popup=f"{row['country']}: {row['win_ratio'] * 100:.2f}%"
+    ).add_to(m)
+
+# Display the map in Streamlit
+st.title('Win Ratios by Country')
+st_folium(m, width=800, height=500)
