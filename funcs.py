@@ -1,5 +1,40 @@
 import pandas as pd
 import numpy as np
+import streamlit as st
+
+# Loading the data
+@st.cache_data
+def load_data():
+    """
+    A function that loads the data from csv and caches it so it can be shared accross sessions
+    """
+    df_goals = pd.read_csv('data/goalscorers.csv')
+    df_results = pd.read_csv('data/results.csv')
+    df_shootouts = pd.read_csv('data/shootouts.csv')
+    df_locations = pd.read_csv('data/country_coords.csv')
+
+
+    df_goals['date'] = pd.to_datetime(df_goals['date'], format='%Y-%m-%d')
+    df_results['date'] = pd.to_datetime(df_results['date'], format='%Y-%m-%d')
+    df_shootouts['date'] = pd.to_datetime(df_shootouts['date'], format='%Y-%m-%d')
+
+
+    return df_goals, df_results, df_shootouts, df_locations
+
+@st.cache_data
+def get_win_ratio(df_results, df_locations, for_team):
+    teams = pd.concat([df_results['home_team'], df_results['away_team']]).unique()
+    df_locations = df_locations[df_locations['country'].isin(teams)]
+    for team in teams:
+        df = df_results[(df_results['home_team'] == team) | (df_results['away_team'] == team)]
+        games = len(df)
+        wins = len(team_won(df, for_team))
+        if wins > 0.0:
+            win_ratio = round(wins/games, 3)
+        else:
+            win_ratio = 0.0
+        df_locations.loc[df_locations['country'] == team, 'win_ratio'] = win_ratio
+    return df_locations
 
 
 def filter_team(df: pd.DataFrame, teams):
