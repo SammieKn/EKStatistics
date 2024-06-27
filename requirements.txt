@@ -3,3 +3,5 @@ numpy
 streamlit
 altair
 kaggle
+folium
+streamlit-folium
