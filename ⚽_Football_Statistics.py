@@ -8,7 +8,7 @@ import folium
 from streamlit_folium import st_folium
 from country_coords import country_coords
 
-from funcs import filter_dataframe, calculate_team_stats, team_won, highlight_wins
+from funcs import load_data, get_win_ratio, filter_dataframe, calculate_team_stats, team_won, highlight_wins
 
 #Page configurations including favicon and title
 st.set_page_config(
@@ -17,56 +17,10 @@ st.set_page_config(
 )
 
 # Loading the data
-@st.cache_data
-def load_data():
-    """
-    A function that loads the data from csv and caches it so it can be shared accross sessions
-    """
-    df_goals = pd.read_csv('data/goalscorers.csv')
-    df_results = pd.read_csv('data/results.csv')
-    df_shootouts = pd.read_csv('data/shootouts.csv')
-
-    df_goals['date'] = pd.to_datetime(df_goals['date'], format='%Y-%m-%d')
-    df_results['date'] = pd.to_datetime(df_results['date'], format='%Y-%m-%d')
-    df_shootouts['date'] = pd.to_datetime(df_shootouts['date'], format='%Y-%m-%d')
-
-    return df_goals, df_results, df_shootouts
-
-df_goals, df_results, df_shootouts = load_data()
-
-@st.cache_data
-def compute_win_percentage(df_res_filtered_map):
-    """Function to calculate for each team the win percentage based on a filtered input dataframe as input for the
-    map"""
-
-    map_data = {
-        'country': [],
-        'win_ratio': []
-    }
-
-    map_df = pd.DataFrame(map_data)
-
-    # Calculate win ratio's for each country
-    for team in teams:
-        if team not in country_coords:
-            continue
-
-        total_wins = len(team_won(df_res_filtered_map, team=team))
-
-        try:
-            total_num_matches = len(filter_dataframe(df_res_filtered_map, home_team=team))
-        except ValueError:
-            # in case no information is present for a team in the selected time range
-            continue
-
-        win_pct = total_wins / total_num_matches
-
-        # Add the team (country) to the map with the corresponding win ratio
-        team_map_data = {'country': [team], 'win_ratio': [win_pct]}
-        team_map_df = pd.DataFrame(team_map_data)
-        map_df = pd.concat([map_df, team_map_df])
-
-    return map_df
+# ------------------------------
+df_goals, df_results, df_shootouts, df_locations = load_data()
+df_temp = pd.DataFrame(pd.concat([df_results['home_team'], df_results['away_team']]).unique())
+df_temp.to_csv('./temp.csv')
 
 # Sidebar area
 # ------------------------------
@@ -236,18 +190,8 @@ st.dataframe(df_10, hide_index=True, use_container_width=True)
 # World map
 # ---------
 
-# Filter the results based on the year span and tournament
-df_res_filtered_map = filter_dataframe(df_results, tournaments=tournaments, year_range=years)
-
-# Create the dataframe (win percentages per country/team) for the map
-map_df = compute_win_percentage(df_res_filtered_map)
-
-def get_country_lat(country):
-    return country_coords.get(country, (0, 0))[0]
-
-def get_country_lon(country):
-    return country_coords.get(country, (0, 0))[1]
-
+df_locations = get_win_ratio(df_res_filtered, df_locations, team)
+st.dataframe(df_locations)
 
 # Function to map win ratio to color
 def win_ratio_to_color(win_ratio):
@@ -264,16 +208,17 @@ def win_ratio_to_color(win_ratio):
 m = folium.Map(location=[20, 0], zoom_start=2)
 
 # Add countries to the map
-for idx, row in map_df.iterrows():
-    folium.CircleMarker(
-        location=(get_country_lat(row['country']), get_country_lon(row['country'])),
-        radius=10,
-        color=win_ratio_to_color(row['win_ratio']),
-        fill=True,
-        fill_color=win_ratio_to_color(row['win_ratio']),
-        fill_opacity=0.6,
-        popup=f"{row['country']}: {row['win_ratio'] * 100:.2f}%"
-    ).add_to(m)
+for idx, row in df_locations.iterrows():
+    if row['win_ratio']:
+        folium.CircleMarker(
+            location=(row['lat'], row['lon']),
+            radius=10,
+            color=win_ratio_to_color(row['win_ratio']),
+            fill=True,
+            fill_color=win_ratio_to_color(row['win_ratio']),
+            fill_opacity=0.6,
+            popup=f"{row['country']}: {row['win_ratio'] * 100:.2f}%"
+        ).add_to(m)
 
 # Display the map in Streamlit
 st.title('Win Ratios by Country')
